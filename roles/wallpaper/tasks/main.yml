@@ -1,0 +1,101 @@
+---
+- name: Ensure the destination directory exists
+  ansible.builtin.file:
+    path: "/tmp/wallpapers"
+    state: directory
+
+- name: Copy the wallpaper image to the destination directory
+  ansible.builtin.copy:
+    src: "files/GQ6niBAbwAEguIr.jpg"
+    dest: "{{ dest_image }}"
+    remote_src: no
+
+- name: Check if GNOME desktop is installed
+  ansible.builtin.stat:
+    path: /usr/bin/gnome-shell
+  register: gnome_desktop
+
+- name: Check if MATE desktop is installed
+  ansible.builtin.stat:
+    path: /usr/bin/mate-session
+  register: mate_desktop
+
+- name: Check if KDE desktop is installed
+  ansible.builtin.stat:
+    path: /usr/bin/startkde
+  register: kde_desktop
+
+- name: Check if XFCE desktop is installed
+  ansible.builtin.stat:
+    path: /usr/bin/xfce4-settings-manager
+  register: xfce_desktop
+
+- name: Check if LXDE desktop is installed
+  ansible.builtin.stat:
+    path: /usr/bin/lxsession
+  register: lxde_desktop
+
+- name: Install GNOME dependencies
+  ansible.builtin.package:
+    name: gsettings-desktop-schemas
+    state: present
+  when: gnome_desktop.stat.exists
+
+- name: Install MATE dependencies
+  ansible.builtin.package:
+    name: dconf-cli
+    state: present
+  when: mate_desktop.stat.exists
+
+- name: Install KDE dependencies
+  ansible.builtin.package:
+    name: qttools5-dev-tools
+    state: present
+  when: kde_desktop.stat.exists
+
+- name: Install XFCE dependencies
+  ansible.builtin.package:
+    name: xfconf
+    state: present
+  when: xfce_desktop.stat.exists
+
+- name: Install LXDE dependencies
+  ansible.builtin.package:
+    name: lxsession
+    state: present
+  when: lxde_desktop.stat.exists
+
+- name: Set GNOME wallpaper using gsettings
+  ansible.builtin.command: >
+    gsettings set org.gnome.desktop.background picture-uri 'file://{{ dest_image }}'
+  when: gnome_desktop.stat.exists
+  notify: Restart GNOME
+
+- name: Set MATE wallpaper using dconf
+  ansible.builtin.command: >
+    dconf write /org/mate/desktop/background/picture-filename "'{{ dest_image }}'"
+  when: mate_desktop.stat.exists
+  notify: Restart MATE
+
+- name: Set KDE wallpaper using qdbus
+  ansible.builtin.command: >
+    qdbus org.kde.plasmashell /PlasmaShell evaluateScript "var allDesktops = desktops(); for (var i=0; i<allDesktops.length; i++) { d = allDesktops[i]; d.wallpaperPlugin = 'org.kde.image'; d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General']; d.writeConfig('Image', 'file://{{ dest_image }}'); }"
+  when: kde_desktop.stat.exists
+  notify: Restart KDE
+
+- name: Set XFCE wallpaper using xfconf-query
+  ansible.builtin.command: >
+    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "{{ dest_image }}"
+  when: xfce_desktop.stat.exists
+  notify: Restart XFCE
+
+- name: Set LXDE wallpaper using lxsession
+  ansible.builtin.command: >
+    lxsession-default-apps
+  when: lxde_desktop.stat.exists
+  notify: Restart LXDE
+
+- name: Print a message about missing desktop environments
+  ansible.builtin.debug:
+    msg: "No supported desktop environment found for setting the wallpaper."
+  when: not (gnome_desktop.stat.exists or mate_desktop.stat.exists or kde_desktop.stat.exists or xfce_desktop.stat.exists or lxde_desktop.stat.exists)
