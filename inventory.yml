@@ -1,6 +1,6 @@
 all:
   hosts:
     my_host:
-      ansible_host: localhost # замени на реальный IP или hostname
+      ansible_host: local # замени на реальный IP или hostname
   vars:
     dest_image: "/tmp/wallpapers/GQ6niBAbwAEguIr.jpg"
