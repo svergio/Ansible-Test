@@ -2,5 +2,6 @@ all:
   hosts:
     my_host:
       ansible_host: local # замени на реальный IP или hostname
+      ansible_python_interpreter: /usr/bin/python3
   vars:
     dest_image: "/tmp/wallpapers/GQ6niBAbwAEguIr.jpg"
