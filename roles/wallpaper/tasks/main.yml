@@ -99,3 +99,5 @@
   ansible.builtin.debug:
     msg: "No supported desktop environment found for setting the wallpaper."
   when: not (gnome_desktop.stat.exists or mate_desktop.stat.exists or kde_desktop.stat.exists or xfce_desktop.stat.exists or lxde_desktop.stat.exists)
+  failed_when: not (gnome_desktop.stat.exists or mate_desktop.stat.exists or kde_desktop.stat.exists or xfce_desktop.stat.exists or lxde_desktop.stat.exists)
+  ignore_errors: yes

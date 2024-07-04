@@ -1,20 +1,35 @@
 ---
 - name: Restart GNOME
-  ansible.builtin.command: >
-    gnome-shell --replace &
+  ansible.builtin.shell: |
+    gnome-shell --replace
+  async: 45
+  poll: 5
+  when: gnome_desktop.stat.exists
 
 - name: Restart MATE
-  ansible.builtin.command: >
-    mate-session-save --logout &
+  ansible.builtin.shell: |
+    mate-session-save --logout
+  async: 45
+  poll: 5
+  when: mate_desktop.stat.exists
 
 - name: Restart KDE
-  ansible.builtin.command: >
+  ansible.builtin.shell: |
     qdbus org.kde.ksmserver /KSMServer logout 0 0 0
+  async: 45
+  poll: 5
+  when: kde_desktop.stat.exists
 
 - name: Restart XFCE
-  ansible.builtin.command: >
-    xfce4-session-logout --logout &
+  ansible.builtin.shell: |
+    xfce4-session-logout --logout
+  async: 45
+  poll: 5
+  when: xfce_desktop.stat.exists
 
 - name: Restart LXDE
-  ansible.builtin.command: >
+  ansible.builtin.shell: |
     lxsession-logout
+  async: 45
+  poll: 5
+  when: lxde_desktop.stat.exists

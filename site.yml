@@ -1,6 +1,6 @@
 ---
 - name: Apply wallpaper role
-  hosts: localhost #заменить на нужное
+  hosts: all  #заменить на нужное
   become: yes
   roles:
     - wallpaper

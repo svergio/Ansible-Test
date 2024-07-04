@@ -5,3 +5,4 @@ all:
       ansible_python_interpreter: /usr/bin/python3
   vars:
     dest_image: "/tmp/wallpapers/GQ6niBAbwAEguIr.jpg"
+  
